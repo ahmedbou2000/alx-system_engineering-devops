@@ -1,2 +1,23 @@
 #!/bin/bash
-find '.' -type f -name "*.gif" | rev | cut -d "/" -f 1 | cut -d '.' 2- | rev | LC_ALL=C sort -f  
+
+shopt -s globstar nullglob
+
+declare -A files
+
+for file in **/*.gif; do
+    if [[ -f "$file" ]]; then
+        filename=$(basename "$file")
+        filename="${filename%.*}"
+        files[$filename]="$file"
+    fi
+done
+
+LC_ALL=C sort -f <<<"${!files[*]}" > sorted_files.txt
+
+while IFS= read -r line; do
+    echo "${files[$line]##*/}"
+done < sorted_files.txt
+
+rm sorted_files.txt
+echo
+
